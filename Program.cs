@@ -10,7 +10,8 @@ List<Plant> plants = new List<Plant>()
     City = "Nashville",
     ZIP = 12345,
     Sold = false,
-    AvailableUntil = new DateTime(2023, 12, 11)
+    AvailableUntil = DateTime.Today.AddDays(62),
+    PlantType = "tree"
     },
     new Plant()
     {
@@ -20,7 +21,8 @@ List<Plant> plants = new List<Plant>()
     City = "Memphis",
     ZIP = 43567,
     Sold = false,
-    AvailableUntil = new DateTime(2023, 11, 23)
+    AvailableUntil = DateTime.Today.AddDays(12),
+     PlantType = "tree"
     },
     new Plant()
     {
@@ -30,7 +32,8 @@ List<Plant> plants = new List<Plant>()
     City = "Atlanta",
     ZIP = 27290,
     Sold = false,
-    AvailableUntil = new DateTime(2023, 11, 20)
+    AvailableUntil = DateTime.Today.AddDays(11),
+     PlantType = "bush"
     },
     new Plant()
     {
@@ -40,7 +43,8 @@ List<Plant> plants = new List<Plant>()
     City = "Kansas City",
     ZIP = 54907,
     Sold = true,
-    AvailableUntil = new DateTime(2023, 12, 2)
+    AvailableUntil = DateTime.Today.AddDays(2),
+    PlantType = "bush"
     },
     new Plant()
     {
@@ -50,7 +54,8 @@ List<Plant> plants = new List<Plant>()
     City = "Springfield",
     ZIP = 89102,
     Sold = false,
-    AvailableUntil = new DateTime(2023, 11, 30)
+    AvailableUntil = DateTime.Today.AddDays(365),
+    PlantType = "flower"
     },
     new Plant()
     {
@@ -60,7 +65,8 @@ List<Plant> plants = new List<Plant>()
     City = "San Francisco",
     ZIP = 12345,
     Sold = false,
-    AvailableUntil = new DateTime(2023, 12, 20)
+    AvailableUntil = DateTime.Today.AddDays(45),
+    PlantType = "bush"
     },
     new Plant()
     {
@@ -70,7 +76,8 @@ List<Plant> plants = new List<Plant>()
     City = "Seattle",
     ZIP = 90556,
     Sold = false,
-    AvailableUntil = new DateTime(2023, 11, 25)
+    AvailableUntil = DateTime.Today.AddDays(13),
+    PlantType = "flower"
     },
     new Plant()
     {
@@ -80,7 +87,8 @@ List<Plant> plants = new List<Plant>()
     City = "Panama City",
     ZIP = 27290,
     Sold = true,
-    AvailableUntil = new DateTime(2023, 11, 30)
+    AvailableUntil = DateTime.Today.AddDays(55),
+    PlantType = "flower"
     },
     new Plant()
     {
@@ -90,7 +98,8 @@ List<Plant> plants = new List<Plant>()
     City = "Chattanooga",
     ZIP = 54907,
     Sold = false,
-    AvailableUntil = new DateTime(2023, 12, 25)
+    AvailableUntil = DateTime.Today.AddDays(99),
+    PlantType = "herb"
     },
     new Plant()
     {
@@ -100,7 +109,8 @@ List<Plant> plants = new List<Plant>()
     City = "Dubai",
     ZIP = 89102,
     Sold = true,
-    AvailableUntil = new DateTime(2023, 11, 12)
+    AvailableUntil = DateTime.Today.AddDays(21),
+    PlantType = "herb"
     }
 };
 
@@ -122,14 +132,15 @@ while (choice != "0")
 4. Delist a plant
 5. Plant of the day
 6. Search for plants based off of light needs
-7. Statistics for plants 
+7. Statistics for plants
+8. Inventory by species 
 ");
 
     if (int.TryParse(Console.ReadLine(), out int userChoice))   //Tryparse converts string to number
     {                                                           // out keyword indicates the param is passed by reference and that it will be modified by the method
         Console.Clear();    //console clears every time user makes a choice
 
-        switch (userChoice)      
+        switch (userChoice)
         {
 
             case 0:
@@ -162,6 +173,10 @@ while (choice != "0")
             case 7:
                 PlantStats();
                 break;
+
+            case 8:
+                InventoryBySpecies(plants);
+                break;
         }
     }
     else
@@ -177,7 +192,7 @@ void ListPlants()
     for (int i = 0; i < plants.Count; i++)
     {
         TimeSpan timeLeftInStock = plants[i].AvailableUntil - DateTime.Now;
-        Console.WriteLine(@$"{i + 1}. {plants[i].Species} is in {plants[i].City} and {(plants[i].Sold ? "is not available." : $"is available for {plants[i].AskingPrice} dollars. It will be on shelves for another {(plants[i].Sold ? "" : $"{timeLeftInStock.Days}")} days.")}");
+        Console.WriteLine($"{i + 1}. {PlantString(plants[i])}");
     }
 }
 
@@ -239,6 +254,35 @@ void PostPlantForAdoption()
             Console.WriteLine("Invalid input playa. Enter date in the MM/DD/YYYY format.");
         }
     }
+
+    string[] plantTypes =
+{
+    "tree",
+    "bush",
+    "flower",
+    "herb"
+};
+    // Plant Type
+    Console.WriteLine("Choose Plant Type:");
+
+    for (int i = 0; i < plantTypes.Length; i++)
+    {
+        Console.WriteLine($"{i + 1}. {plantTypes[i]}");
+    }
+
+    if (int.TryParse(Console.ReadLine(), out int plantTypeChoice) &&
+        plantTypeChoice >= 1 && plantTypeChoice <= plantTypes.Length)
+    {
+        newPlant.PlantType = plantTypes[plantTypeChoice - 1];
+    }
+    else
+    {
+        Console.WriteLine("Invalid choice. Setting new PlantType to 'Idk bruh'.");
+        newPlant.PlantType = "Idk bruh";
+    }
+
+    // Display the plant details
+    Console.WriteLine(PlantString(newPlant));
 
 
     newPlant.Sold = false;
@@ -425,10 +469,40 @@ void PlantStats()
 
 }
 
+
+void InventoryBySpecies(List<Plant> plants)
+{
+    Dictionary<string, int> plantsBySpecies = new Dictionary<string, int>();
+
+    foreach (Plant plant in plants)
+    {
+        string species = plant.Species;
+
+        if (plantsBySpecies.ContainsKey(species))   // Determines whether the Dictionary<TKey, TValue> contains the specified key.
+        {
+            // Increment the value if the species is already in the dictionary
+            plantsBySpecies[species]++;
+        }
+        else
+        {
+            // Add a new key-value pair if the species is not in the dictionary
+            plantsBySpecies.Add(species, 1);
+        }
+    }
+
+    // Print out the inventory report
+    Console.WriteLine("Inventory by Species:");
+    foreach (var speciesOfPlant in plantsBySpecies)
+    {
+        Console.WriteLine($"{speciesOfPlant.Key}: {speciesOfPlant.Value}");
+    }
+}
+
 string PlantString(Plant plant)
 {
     TimeSpan timeLeftInStock = plant.AvailableUntil - DateTime.Now;
-    string plantString = $"{plant.Species} is in {plant.City} and {(plant.Sold ? "is not available." : "is available")} for ${plant.AskingPrice}. It will be on shelves for another {(plant.Sold ? "" : $"{timeLeftInStock.Days}")} days.";
+    string plantString = $"{plant.Species} is in {plant.City} and is a/an {plant.PlantType}. {(plant.Sold ? "It is not available." : $"It is available for ${plant.AskingPrice}. It will be on shelves for another {(timeLeftInStock.Days > 0 ? $"{timeLeftInStock.Days} days so you better hurry and jump on this deal!" : "no more days")}.")}";
 
     return plantString;
 }
+
