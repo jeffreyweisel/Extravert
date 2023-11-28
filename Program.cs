@@ -222,10 +222,37 @@ void PostPlantForAdoption()
 
     //Zip Code
     Console.WriteLine("Zip Code:");
+
+try
+{
     if (int.TryParse(Console.ReadLine(), out int ZIP))
     {
-        newPlant.ZIP = ZIP;
+        // Check if the ZIP is too long
+        if (ZIP.ToString().Length > 5)
+        {
+            throw new TooLongException("ZIP is too long");
+        }
+        else
+        {
+            // Set the ZIP code in the newPlant instance
+            newPlant.ZIP = ZIP;
+        }
     }
+    else
+    {
+        // Handle the case where parsing fails (entered value is not an integer)
+        throw new Exception("Invalid ZIP format");
+    }
+}
+catch (TooLongException ex)
+{
+    Console.WriteLine($"Error: {ex.Message}");
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Error: {ex.Message}");
+}
+
 
     //Available Until Date
     bool validInput = false;
@@ -270,8 +297,7 @@ void PostPlantForAdoption()
         Console.WriteLine($"{i + 1}. {plantTypes[i]}");
     }
 
-    if (int.TryParse(Console.ReadLine(), out int plantTypeChoice) &&
-        plantTypeChoice >= 1 && plantTypeChoice <= plantTypes.Length)
+    if (int.TryParse(Console.ReadLine(), out int plantTypeChoice))
     {
         newPlant.PlantType = plantTypes[plantTypeChoice - 1];
     }
@@ -501,8 +527,15 @@ void InventoryBySpecies(List<Plant> plants)
 string PlantString(Plant plant)
 {
     TimeSpan timeLeftInStock = plant.AvailableUntil - DateTime.Now;
-    string plantString = $"{plant.Species} is in {plant.City} and is a/an {plant.PlantType}. {(plant.Sold ? "It is not available." : $"It is available for ${plant.AskingPrice}. It will be on shelves for another {(timeLeftInStock.Days > 0 ? $"{timeLeftInStock.Days} days so you better hurry and jump on this deal!" : "no more days")}.")}";
+    string plantString = $"{plant.Species} is in {plant.City} and is a/an {plant.PlantType}. {(plant.Sold ? "It is not available." : $"It is available for ${plant.AskingPrice}. It will be on shelves for another {(timeLeftInStock.Days > 0 ? $"{timeLeftInStock.Days} days so you better hurry and jump on this deal!" : "no more days.")}")}";
 
     return plantString;
 }
 
+public class TooLongException : Exception
+{
+    public TooLongException(string message) : base(message)
+    {
+
+    }
+}
